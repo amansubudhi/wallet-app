@@ -13,10 +13,14 @@
     "@repo/db": "*",
     "@repo/store": "*",
     "@repo/ui": "*",
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^5.1.1",
     "next": "14.2.18",
+    "next-auth": "^4.24.10",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "recoil": "^0.7.7"
+    "recoil": "^0.7.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
