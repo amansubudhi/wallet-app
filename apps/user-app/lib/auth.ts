@@ -28,8 +28,6 @@ export const authOptions = {
                     })
                 }
                 const { phone, password } = result.data;
-                console.log(phone);
-                console.log(password);
                 const existingUser = await db.user.findFirst({
                     where: {
                         number: phone
