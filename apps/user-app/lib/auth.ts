@@ -2,7 +2,6 @@ import db from "@repo/db/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import zod from "zod";
-import { NextResponse } from "next/server";
 
 
 const userSchema = zod.object({
@@ -21,11 +20,7 @@ export const authOptions = {
             async authorize(credentials: any) {
                 const result = userSchema.safeParse(credentials);
                 if (!result.success) {
-                    return NextResponse.json({
-                        message: "Invalid inputs"
-                    }, {
-                        status: 400
-                    })
+                    throw new Error("Invalid credentials");
                 }
                 const { phone, password } = result.data;
                 const existingUser = await db.user.findFirst({
@@ -73,7 +68,6 @@ export const authOptions = {
     callbacks: {
         async session({ token, session }: any) {
             session.user.id = token.sub
-
             return session
         }
     }

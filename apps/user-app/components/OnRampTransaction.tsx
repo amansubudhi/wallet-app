@@ -1,17 +1,13 @@
 import { Card } from "@repo/ui/card"
+import type { OnRampStatus } from "@prisma/client";
 
-enum StatusTypes {
-    Success,
-    Failure,
-    Processing
-}
 export const OnRampTransactions = ({
     transactions
 }: {
     transactions: {
         time: Date,
         amount: number,
-        status: StatusTypes,
+        status: OnRampStatus,
         provider: string
     }[]
 }) => {
