@@ -24,9 +24,14 @@ async function getOnRampTransactions() {
     const txns = await prisma.onRampTransaction.findMany({
         where: {
             userId: Number(session?.user?.id)
-        }
+        },
+        orderBy: {
+            startTime: "desc"
+        },
+        take: 3
     });
     return txns.map(t => ({
+        id: t.id,
         time: t.startTime,
         amount: t.amount,
         status: t.status,
@@ -38,8 +43,8 @@ export default async function () {
     const balance = await getBalance();
     const transactions = await getOnRampTransactions();
 
-    return <div className="w-screen">
-        <div className="text-4xl text-[#6a51a6] pt-8 mb-8 font-bold">
+    return <div className="w-screen p-8">
+        <div className="text-3xl font-bold mb-6 ">
             Transfer
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 p-4">

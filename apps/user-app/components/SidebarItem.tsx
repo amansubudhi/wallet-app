@@ -8,13 +8,13 @@ export const SidebarItem = ({ href, title, icon }: { href: string; title: string
     const pathname = usePathname()
     const selected = pathname === href
 
-    return <div className={`flex${selected ? "text-[#6a51a6]" : "text-slate-500"} cursor-pointer p-2 pl-8`} onClick={() => {
+    return <div className={`flex text-sm font-medium rounded-md gap-4 items-center cursor-pointer px-4 py-2 hover:bg-gray-100`} onClick={() => {
         router.push(href);
     }}>
-        <div className="pr-2">
+        <div className="">
             {icon}
         </div>
-        <div className={`font-bold ${selected ? "text-[#6a51a6]" : "text-slate500"}`}>
+        <div className={``}>
             {title}
         </div>
     </div>
