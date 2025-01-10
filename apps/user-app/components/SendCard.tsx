@@ -12,22 +12,22 @@ export function SendCard() {
     const [amount, setAmount] = useState("");
 
     return <div className="h-[90vh]">
-        <Center>
-            <Card title="Send">
-                <div className="min-w-72 pt-2">
-                    <TextInput placeholder={"Number"} label="Number" onChange={(value) => {
-                        setNumber(value)
-                    }} />
-                    <TextInput placeholder={"Amount"} label="Amount" onChange={(value) => {
-                        setAmount(value)
-                    }} />
-                    <div className="pt-4 flex justify-center">
-                        <Button onClick={async () => {
-                            await p2pTransfer(number, Number(amount) * 100)
-                        }}>Send</Button>
-                    </div>
+        <Card title="Transfer Details">
+            <div className="min-w-72 pt-2">
+                <TextInput placeholder={"Enter recipient's number"} label="Recipient" onChange={(value) => {
+                    setNumber(value)
+                }} />
+                <TextInput placeholder={"Enter Amount"} label="Amount (INR)" onChange={(value) => {
+                    setAmount(value)
+                }} />
+                <div className="pt-4 flex justify-center">
+                    <Button onClick={async () => {
+                        await p2pTransfer(number, Number(amount) * 100)
+                        setNumber("")
+                        setAmount("")
+                    }}>Send Money</Button>
                 </div>
-            </Card>
-        </Center>
+            </div>
+        </Card>
     </div>
 }
