@@ -1,29 +1,11 @@
 import { Card } from "@repo/ui/card";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
-import prisma from "@repo/db/client";
+import { getCombinedTransactions } from "../../../lib/actions/getTransactions"
 
-async function getOnRampTransactions() {
-    const session = await getServerSession(authOptions);
-    const txns = await prisma.onRampTransaction.findMany({
-        where: {
-            userId: Number(session?.user?.id)
-        },
-        orderBy: {
-            startTime: "desc"
-        }
-    });
-    return txns.map(t => ({
-        id: t.id,
-        time: t.startTime,
-        amount: t.amount,
-        status: t.status,
-        provider: t.provider
-    }))
-}
+
 
 export default async function () {
-    const transactions = await getOnRampTransactions();
+    const transactions = await getCombinedTransactions();
+
 
     if (!transactions.length) {
         return <Card title="Transactions">
@@ -32,6 +14,7 @@ export default async function () {
             </div>
         </Card>
     }
+
     return <div className="w-full h-screen">
         <Card title="Transactions">
             <div className="pt-4">
@@ -48,6 +31,20 @@ export default async function () {
                         + Rs {t.amount / 100}
                     </div>
                 </div>)}
+                {/* Hi there */}
+                {/* <div>
+                    <h1>Transactions</h1>
+                    <ul>
+                        {combinedTransactions.map((txn) => (
+                            <li key={txn.id}>
+                                <p>Type: {txn.type}</p>
+                                <p>Time: {txn.time.toLocaleString()}</p>
+                                <p>Amount: {txn.amount}</p>
+                                <p>Direction: {txn.direction}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </div> */}
             </div>
         </Card>
     </div>
