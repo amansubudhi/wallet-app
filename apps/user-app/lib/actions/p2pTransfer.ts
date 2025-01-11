@@ -34,27 +34,56 @@ export async function p2pTransfer(to: string, amount: number) {
             throw new Error('Insufficient funds');
         }
 
-        await tx.balance.update({
+        await tx.balance.upsert({
             where: {
                 userId: Number(from)
             },
-            data: {
+            update: {
                 amount: {
                     decrement: amount
+                }
+            },
+            create: {
+                amount,
+                locked: 0,
+                user: {
+                    connect: {
+                        id: Number(from)
+                    }
                 }
             }
         });
 
-        await tx.balance.update({
+        await tx.balance.upsert({
             where: {
                 userId: toUser.id
             },
-            data: {
+            update: {
                 amount: {
                     increment: amount
                 }
+            },
+            create: {
+                amount,
+                locked: 0,
+                user: {
+                    connect: {
+                        id: toUser.id
+                    }
+                }
             }
         });
+
+        // await tx.balance.update({
+        //     where: {
+        //         userId: toUser.id
+        //     },
+        //     data: {
+        //         amount: {
+        //             increment: amount
+        //         }
+        //     }
+        // });
 
         await tx.p2pTransfer.create({
             data: {
