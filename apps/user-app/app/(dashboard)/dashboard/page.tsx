@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { BalanceCard } from "../../../components/BalanceCard";
 import { QuickActionsCard } from "../../../components/QuickActionsCard";
-import { OnRampTransactions } from "../../../components/OnRampTransaction";
-import { getOnRampTransactions } from "../../../lib/actions/getTransactions";
+import { getCombinedTransactions } from "../../../lib/actions/getTransactions";
+import { TransactionsCard } from "../../../components/TransactionsCard";
 
 async function getBalance() {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ async function getBalance() {
 }
 export default async function () {
     const balance = await getBalance();
-    const transactions = await getOnRampTransactions();
+    const transactions = await getCombinedTransactions();
 
     return <div className="w-screen p-8">
         <div className="text-3xl font-bold mb-6 ">
@@ -31,7 +31,7 @@ export default async function () {
             <QuickActionsCard />
         </div>
         <div className="pt-4">
-            <OnRampTransactions transactions={transactions} />
+            <TransactionsCard transactions={transactions.slice(0, 3)} />
         </div>
     </div>
 }
