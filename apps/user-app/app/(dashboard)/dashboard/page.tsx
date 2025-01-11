@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { BalanceCard } from "../../../components/BalanceCard";
 import { QuickActionsCard } from "../../../components/QuickActionsCard";
+import { OnRampTransactions } from "../../../components/OnRampTransaction";
+import { getOnRampTransactions } from "../../../lib/actions/getTransactions";
 
 async function getBalance() {
     const session = await getServerSession(authOptions);
@@ -18,6 +20,7 @@ async function getBalance() {
 }
 export default async function () {
     const balance = await getBalance();
+    const transactions = await getOnRampTransactions();
 
     return <div className="w-screen p-8">
         <div className="text-3xl font-bold mb-6 ">
@@ -26,6 +29,9 @@ export default async function () {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <BalanceCard amount={balance.amount} locked={balance.locked} />
             <QuickActionsCard />
+        </div>
+        <div className="pt-4">
+            <OnRampTransactions transactions={transactions} />
         </div>
     </div>
 }
