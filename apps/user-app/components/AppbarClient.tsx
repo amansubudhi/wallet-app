@@ -9,7 +9,7 @@ export function AppbarClient() {
     const router = useRouter();
 
     return (
-        <div className="bg-white border-b border-gray-200 px-4 py-2.5">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-2.5">
             <Appbar onSignin={signIn} onSignout={async () => {
                 await signOut()
                 router.push("/api/auth/signin")

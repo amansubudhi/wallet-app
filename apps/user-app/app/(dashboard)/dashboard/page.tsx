@@ -1,3 +1,4 @@
+import "../../globals.css"
 import prisma from "@repo/db/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
@@ -22,7 +23,7 @@ export default async function () {
     const balance = await getBalance();
     const transactions = await getCombinedTransactions();
 
-    return <div className="w-screen p-8">
+    return <div className="w-screen custom-scrollbar overflow-auto p-8" style={{ height: 'calc(100vh - 57px' }}>
         <div className="text-3xl font-bold mb-6 ">
             Dashboard
         </div>

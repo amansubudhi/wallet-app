@@ -1,5 +1,6 @@
+import { Card } from "@repo/ui/card";
 import { getCombinedTransactions } from "../../../lib/actions/getTransactions"
-import { ArrowDownIcon, ArrowUpIcon, ClockCircleIcon, TransactionsCard } from "../../../components/TransactionsCard";
+import { ArrowDownIcon, ArrowUpIcon, CheckCircleIcon, ClockCircleIcon, TransactionsCard } from "../../../components/TransactionsCard";
 
 type TransactionSummary = {
     received: number;
@@ -31,15 +32,15 @@ export default async function () {
     )
 
 
-    return <div className="w-screen p-8">
+    return <div className="w-screen custom-scrollbar overflow-auto p-8" style={{ height: 'calc(100vh - 57px' }}>
         <div className="max-w-4xl mx-auto">
             <div className="text-3xl font-bold mb-6 ">
                 Transactions
             </div>
             <div className="grid md:grid-cols-3 gap-4 mb-8">
-                <AmountCard label="Received" icon={<ArrowDownIcon size={4} />} value={summary.received} />
-                <AmountCard label="Sent" icon={<ArrowUpIcon size={4} />} value={summary.sent} />
-                <AmountCard label="Processing" icon={<ClockCircleIcon size={4} />} value={summary.processing} />
+                <AmountCard label="Received" icon={<ArrowDownIcon value="size-4" />} value={summary.received} />
+                <AmountCard label="Sent" icon={<ArrowUpIcon value="size-4" />} value={summary.sent} />
+                <AmountCard label="Processing" icon={<ClockCircleIcon value="size-4" />} value={summary.processing} />
             </div>
             <TransactionsCard transactions={transactions} />
         </div>

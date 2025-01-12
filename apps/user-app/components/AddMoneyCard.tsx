@@ -29,7 +29,7 @@ export const AddMoney = () => {
 
     return <Card title="Add Money to Wallet">
         <div className="w-full pt-2">
-            <TextInput label={"Amount (INR)"} placeholder={"Enter Amount"} onChange={(value) => {
+            <TextInput label={"Amount (INR)"} placeholder={"Enter Amount"} value={amount} onChange={(value) => {
                 setAmount(Number(value))
             }} />
             <div className="py-4 text-left">
@@ -44,8 +44,12 @@ export const AddMoney = () => {
             }))} />
             <div className="flex justify-center pt-4">
                 <Button onClick={async () => {
-                    await createOnrampTransaction(amount * 100, provider)
-                    window.location.href = redirectUrl || "";
+                    if (amount <= 0) {
+                        alert('Not allowed')
+                    } else {
+                        await createOnrampTransaction(amount * 100, provider)
+                        window.location.href = redirectUrl || "";
+                    }
                 }}>
                     Add Money
                 </Button>

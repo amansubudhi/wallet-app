@@ -11,7 +11,7 @@ export function SendCard() {
     const [number, setNumber] = useState("");
     const [amount, setAmount] = useState("");
 
-    return <div className="h-[90vh]">
+    return <div className="h-fit">
         <Card title="Transfer Details">
             <div className="min-w-72 pt-2">
                 <TextInput placeholder={"Enter recipient's number"} label="Recipient" value={number} onChange={(value) => {

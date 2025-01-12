@@ -13,7 +13,7 @@ export const Appbar = ({
     onSignin,
     onSignout
 }: AppbarProps) => {
-    return <div className="flex flex-wrap justify-between items-center">
+    return <div className="sticky top-4 flex flex-wrap justify-between items-center">
         <div className="text-xl font-semibold">
             PayTm
         </div>
