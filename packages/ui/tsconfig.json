@@ -1,8 +1,33 @@
+// {
+//   "extends": "@repo/typescript-config/react-library.json",
+//   "compilerOptions": {
+//     "outDir": "dist"
+//   },
+//   "include": ["src"],
+//   "exclude": ["node_modules", "dist"]
+// }
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    // "outDir": "dist",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src",
+    "lib",
+    "hooks"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
