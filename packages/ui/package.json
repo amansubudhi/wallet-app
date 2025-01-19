@@ -9,7 +9,9 @@
     "./appbar": "./src/Appbar.tsx",
     "./center": "./src/Center.tsx",
     "./select": "./src/Select.tsx",
-    "./textinput": "./src/TextInput.tsx"
+    "./textinput": "./src/TextInput.tsx",
+    "./label": "./src/Label.tsx",
+    "./form": "./src/Form.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -27,5 +29,17 @@
     "eslint": "^8.57.0",
     "react": "18.3.1",
     "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.473.0",
+    "react-hook-form": "^7.54.2",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.1"
   }
 }
