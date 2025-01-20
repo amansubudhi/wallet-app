@@ -1,74 +1,85 @@
+import { TOKEN_EXPIRATION_TIME } from "../config/auth.config";
+import { NextAuthOptions } from "next-auth";
 import db from "@repo/db/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import zod from "zod";
-
-
-const userSchema = zod.object({
-    phone: zod.string(),
-    password: zod.string()
-})
+import { ErrorHandler } from "./error";
+import { signinFormSchema } from "./schema/authSchema";
+import { getMaxAge } from "next/dist/server/image-optimizer";
 
 export const authOptions = {
     providers: [
         CredentialsProvider({
-            name: 'Credentials',
+            name: 'signin',
+            id: 'signin',
             credentials: {
-                phone: { label: "Phone number", type: "text", placeholder: "1231231231" },
+                phone: { label: "Phone number", type: "text", placeholder: "phone number" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials: any) {
-                const result = userSchema.safeParse(credentials);
+            async authorize(credentials: any): Promise<any> {
+                const result = signinFormSchema.safeParse(credentials);
                 if (!result.success) {
-                    throw new Error("Invalid credentials");
+                    throw new ErrorHandler(
+                        'Bad request',
+                        'BAD_REQUEST',
+                        {
+                            fieldErrors: result.error.flatten().fieldErrors,
+                        }
+                    )
                 }
-                const { phone, password } = result.data;
-                const existingUser = await db.user.findFirst({
+                const { number, password } = result.data;
+                const existingUser = await db.user.findUnique({
                     where: {
-                        number: phone
+                        number
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        number: true,
+                        password: true,
                     }
                 });
 
-                if (existingUser) {
-                    const passwordValidation = await bcrypt.compare(password, existingUser.password);
-                    if (passwordValidation) {
-                        return {
-                            id: existingUser.id.toString(),
-                            name: existingUser.name,
-                            email: existingUser.number
-                        }
-                    }
-                    return null;
+                if (!existingUser || !existingUser.password) {
+                    throw new ErrorHandler('Phone Number or password is incorrect', 'AUTHENTICATION_FAILED');
                 }
+                console.log("user -", existingUser)
 
-                try {
-                    const hashedPassword = await bcrypt.hash(password, 10);
+                const isPasswordMatch = await bcrypt.compare(password, existingUser.password);
+                console.log("match-- ", isPasswordMatch);
 
-                    const user = await db.user.create({
-                        data: {
-                            number: phone,
-                            password: hashedPassword
-                        }
-                    });
-
-                    return {
-                        id: user.id.toString(),
-                        name: user.name,
-                        email: user.number
-                    }
-                } catch (e) {
-                    console.error(e);
+                if (!isPasswordMatch) {
+                    throw new ErrorHandler('Password is incorrect', 'AUTHENTICATION_FAILED')
                 }
+                return {
+                    id: existingUser.id.toString(),
+                    name: existingUser.name,
+                    number: existingUser.number
+                }
+            }
 
-                return null
-            },
         })
     ],
-    secret: process.env.JWT_SECRET || "secret",
     callbacks: {
+        async redirect({ baseUrl }) {
+            //Always redirect to the assigned page after login
+            return baseUrl;
+        },
         async session({ token, session }: any) {
             session.user.id = token.sub
             return session
         }
-    }
-}
+    },
+    pages: {
+        signIn: '/signin',
+    },
+    session: {
+        strategy: 'jwt',
+        maxAge: TOKEN_EXPIRATION_TIME
+    },
+    jwt: {
+        maxAge: TOKEN_EXPIRATION_TIME
+    },
+    secret: process.env.JWT_SECRET
+} satisfies NextAuthOptions
