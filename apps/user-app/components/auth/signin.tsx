@@ -2,8 +2,8 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from "@repo/ui/button"
-import { Input } from "@repo/ui/forminput"
+import { ButtonLoading } from '../custom/ButtonLoading';
+import { Input } from "../ui/FormInput"
 import {
     Form,
     FormControl,
@@ -12,12 +12,15 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@repo/ui/form"
+} from "../ui/Form"
 import { useState } from "react";
 import { signinFormSchema, SigninSchemaType } from "../../lib/schema/authSchema";
-import { useToast } from '@repo/ui/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { signIn } from "next-auth/react";
 import Link from "next/link"
+import { useRouter } from 'next/navigation';
+import { PATHS } from '../../config/path.config';
+
 
 type signInResponseType = {
     error: string | null
@@ -29,6 +32,7 @@ type signInResponseType = {
 export default function Signin() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const { toast } = useToast();
+    const router = useRouter();
 
     const form = useForm<SigninSchemaType>({
         resolver: zodResolver(signinFormSchema),
@@ -49,12 +53,18 @@ export default function Signin() {
                 toast({
                     title: errorMessage,
                     variant: 'destructive'
-                })
+                });
+                return;
             }
             toast({
                 title: 'Login successful!',
                 variant: 'default'
-            })
+            });
+
+            const searchParams = new URLSearchParams(window.location.search)
+            const redirect = searchParams.get('next') || PATHS.HOME;
+            router.push(redirect);
+            // router.refresh();
         } catch (_error) {
             return toast({
                 title: 'Internal server error',
@@ -63,14 +73,15 @@ export default function Signin() {
         }
     }
 
-    const togglePassword = () => {
+    const togglePassword = (e: React.MouseEvent) => {
+        e.preventDefault();
         setPasswordVisible(!passwordVisible);
     }
     return (
         <div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(formHandler)}>
-                    <div className="flex flex-col justify-center gap-4">
+                    <div className="space-y-4">
                         <FormField
                             control={form.control}
                             name='number'
@@ -78,7 +89,7 @@ export default function Signin() {
                                 <FormItem className="relative">
                                     <FormLabel>Phone Number</FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder="Enter your phone Number" />
+                                        <Input {...field} placeholder='Phone Number' />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -91,29 +102,33 @@ export default function Signin() {
                                 <FormItem className="relative">
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type={passwordVisible ? 'text' : 'password'} {...field} placeholder="Enter your password" />
+                                        <Input {...field} type={passwordVisible ? 'text' : 'password'} placeholder="Enter your password" />
                                     </FormControl>
-                                    <button className="absolute right-2 top-8" onClick={togglePassword}>
+                                    <button type="button" className="absolute right-2 top-8" onClick={togglePassword}>
                                         {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
                                     </button>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <div className="w-full">
-                            <Button>
-                                {form.formState.isSubmitting ? 'Please wait' : 'Sign In'}
-                            </Button>
-                        </div>
                     </div>
+
+                    <ButtonLoading
+                        className="w-full mt-6 bg-gray-800 hover:bg-gray-900 text-white"
+                        type="submit"
+                        disabled={form.formState.isSubmitting}
+                        aria-label="submit"
+                    >
+                        {form.formState.isSubmitting ? 'Please wait' : 'Sign in'}
+                    </ButtonLoading>
                     <div className="text-center text-sm mt-4">
                         <div className="space-x-1">
                             <span className="text-gray-400">Don&apos;t have an account?</span>
-                            <Link className="text-indigo-600 hover:text-indigo-500" href="#">
+                            <Link className="text-blue-600 hover:underline" href="#">
                                 Sign Up
                             </Link>
                         </div>
-                        <Link className="text-indigo-600 hover:text-indigo-500 block mt-2" href="#">
+                        <Link className="text-blue-600 hover:underline block mt-2" href="#">
                             Forgot Password
                         </Link>
                     </div>
