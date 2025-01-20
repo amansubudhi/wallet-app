@@ -1,3 +1,4 @@
+import { AppbarClient } from "../../components/AppbarClient";
 import { SidebarItem } from "../../components/SidebarItem";
 
 export default function Layout({
@@ -6,17 +7,21 @@ export default function Layout({
     children: React.ReactNode;
 }): JSX.Element {
     return (
-        <div className="flex">
-            <div className="w-64 bg-white border-r border-gray-200 p-4" style={{ height: 'calc(100vh - 57px)' }}>
-                <div className="space-y-2">
-                    <SidebarItem href={"/dashboard"} icon={<HomeIcon />} title="Home" />
-                    <SidebarItem href={"/transfer"} icon={<TransferIcon />} title="Transfer" />
-                    <SidebarItem href={"/transactions"} icon={<TransactionsIcon />} title="Transaction" />
-                    <SidebarItem href={"/p2p"} icon={<P2PTransferIcon />} title="P2P Transfer" />
+        <div>
+            <AppbarClient />
+            <div className="flex">
+                <div className="w-64 bg-white border-r border-gray-200 p-4" style={{ height: 'calc(100vh - 57px)' }}>
+                    <div className="space-y-2">
+                        <SidebarItem href={"/dashboard"} icon={<HomeIcon />} title="Home" />
+                        <SidebarItem href={"/transfer"} icon={<TransferIcon />} title="Transfer" />
+                        <SidebarItem href={"/transactions"} icon={<TransactionsIcon />} title="Transaction" />
+                        <SidebarItem href={"/p2p"} icon={<P2PTransferIcon />} title="P2P Transfer" />
+                    </div>
                 </div>
+                {children}
             </div>
-            {children}
         </div>
+
     );
 }
 
