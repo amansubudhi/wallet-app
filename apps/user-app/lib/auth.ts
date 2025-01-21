@@ -5,7 +5,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { ErrorHandler } from "./error";
 import { signinFormSchema } from "./schema/authSchema";
-import { getMaxAge } from "next/dist/server/image-optimizer";
 
 export const authOptions = {
     providers: [
