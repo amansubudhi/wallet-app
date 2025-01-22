@@ -3,7 +3,7 @@ import { Card } from "@repo/ui/card";
 interface Transaction {
     id: number
     type: string
-    time: Date;
+    startTime: Date;
     amount: number;
     status: string;
     direction: string;
@@ -30,7 +30,7 @@ export const TransactionsCard = ({ transactions }: TransactionProps) => {
                         )}
                         <div>
                             <p className="font-medium">{t.type}</p>
-                            <p className="text-sm text-gray-500">{t.time.toDateString()}</p>
+                            <p className="text-sm text-gray-500">{t.startTime.toDateString()}</p>
                         </div>
                     </div>
                     <div className="flex gap-2 items-center">

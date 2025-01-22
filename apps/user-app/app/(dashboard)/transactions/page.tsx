@@ -20,17 +20,19 @@ function AmountCard({ label, icon, value }: { label: string, icon: React.ReactNo
 
 export default async function () {
     const transactions = await getCombinedTransactions();
+
     const summary: TransactionSummary = transactions.reduce((acc, txn) => {
-        txn.type === 'Bank Transfer' || txn.type.includes('From')
+        txn.type.startsWith('Bank Transfer') || txn.type.includes('From')
             ? txn.status === 'Success'
                 ? acc.received += txn.amount
                 : acc.processing += txn.amount
-            : acc.sent += txn.amount
+            : txn.type.includes('To')
+                ? acc.sent += txn.amount
+                : acc
         return acc;
     },
         { received: 0, sent: 0, processing: 0 }
     )
-
 
     return <div className="w-screen custom-scrollbar overflow-auto p-8" style={{ height: 'calc(100vh - 57px' }}>
         <div className="max-w-4xl mx-auto">
