@@ -1,6 +1,5 @@
 "use client"
 
-import { Card } from "@repo/ui/card";
 import { useState } from "react";
 import { useToast } from "../../hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -12,7 +11,6 @@ import { PATHS } from "../../config/path.config";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -22,7 +20,7 @@ import { Input } from "../ui/FormInput"
 import { EyeIcon, EyeOffIcon } from "./Signin";
 import { ButtonLoading } from '../custom/ButtonLoading';
 import Link from "next/link";
-
+import { signIn } from "next-auth/react";
 
 export default function Signup() {
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -49,19 +47,34 @@ export default function Signup() {
                 toast({
                     variant: 'destructive',
                     title: "Something went wrong!! try again after sometime."
-                })
-            } else {
-                toast({
-                    variant: 'default',
-                    title: "Signup succesful, Welcome!"
-                })
-                router.push(PATHS.HOME);
+                });
+                return;
             }
+            toast({
+                variant: 'default',
+                title: "Signup succesful, Welcome!"
+            })
+
+            const signInResponse = await signIn("signin", {
+                redirect: false,
+                number: data.number,
+                password: data.password
+            });
+
+            if (signInResponse?.error) {
+                toast({
+                    variant: "destructive",
+                    title: "Failed to log in after signup. Please log in manually."
+                });
+                return;
+            }
+            router.push(PATHS.HOME);
+
         } catch {
             toast({
                 variant: 'destructive',
                 title: "Something went wrong !! try again after sometime."
-            })
+            });
         }
     }
 
@@ -114,6 +127,22 @@ export default function Signup() {
                         <div className="mt-4">
                             <FormField
                                 control={form.control}
+                                name='number'
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Phone Number</FormLabel>
+                                        <FormControl>
+                                            <Input type="text" {...field} placeholder="Enter your Number" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="mt-4">
+                            <FormField
+                                control={form.control}
                                 name='password'
                                 render={({ field }) => (
                                     <FormItem className="relative">
@@ -130,28 +159,28 @@ export default function Signup() {
                             />
                         </div>
 
+                        <ButtonLoading
+                            className="w-full mt-6 bg-gray-800 hover:bg-gray-900 text-white"
+                            type="submit"
+                            disabled={form.formState.isSubmitting}
+                            aria-label="submit"
+                        >
+                            {form.formState.isSubmitting ? 'Please wait' : 'Sign Up'}
+                        </ButtonLoading>
+                        <div className="text-center text-sm mt-4">
+                            <div className="space-x-1">
+                                <span className="text-gray-500">Already have an account?</span>
+                                <Link className="text-blue-600 hover:underline" href="/signin">
+                                    Sign In
+                                </Link>
+                            </div>
+                            <Link className="text-blue-600 hover:underline block mt-2" href="#">
+                                Forgot Password
+                            </Link>
+                        </div>
+
                     </form>
                 </Form>
-            </div>
-
-            <ButtonLoading
-                className="w-full mt-6 bg-gray-800 hover:bg-gray-900 text-white"
-                type="submit"
-                disabled={form.formState.isSubmitting}
-                aria-label="submit"
-            >
-                {form.formState.isSubmitting ? 'Please wait' : 'Sign Up'}
-            </ButtonLoading>
-            <div className="text-center text-sm mt-4">
-                <div className="space-x-1">
-                    <span className="text-gray-500">Already have an account?</span>
-                    <Link className="text-blue-600 hover:underline" href="/signin">
-                        Sign In
-                    </Link>
-                </div>
-                <Link className="text-blue-600 hover:underline block mt-2" href="#">
-                    Forgot Password
-                </Link>
             </div>
         </div>
     )

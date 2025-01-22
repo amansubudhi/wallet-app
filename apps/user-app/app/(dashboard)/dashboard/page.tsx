@@ -9,6 +9,7 @@ import { TransactionsCard } from "../../../components/TransactionsCard";
 
 async function getBalance() {
     const session = await getServerSession(authOptions);
+    console.log(session)
     const balance = await prisma.balance.findFirst({
         where: {
             userId: Number(session?.user?.id)
