@@ -1,3 +1,4 @@
+import Link from "next/link";
 
 interface AppbarProps {
     user?: {
@@ -14,9 +15,9 @@ export const Appbar = ({
 }: AppbarProps) => {
     return <div className="sticky top-4 flex flex-wrap justify-between items-center">
         <div className="text-xl font-semibold">
-            PayTm
+            <Link href="/dashboard">PayTM</Link>
         </div>
-        <div className="flex items-center justify-center gap-2 hover:bg-gray-100 px-4 py-2 rounded-md" onClick={user ? onSignout : onSignin}>
+        <div className="flex items-center justify-center gap-2 hover:bg-gray-100 px-4 py-2 rounded-md cursor-pointer" onClick={user ? onSignout : onSignin}>
             <LogoutIcon />
             <span className="text-sm font-md">{user ? "Logout" : "Login"}</span>
         </div>

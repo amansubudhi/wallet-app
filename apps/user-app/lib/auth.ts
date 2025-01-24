@@ -4,7 +4,8 @@ import db from "@repo/db/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { ErrorHandler } from "./error";
-import { signinFormSchema } from "./schema/authSchema";
+import { signinFormSchema, guestSigninFormSchema } from "./schema/authSchema";
+
 
 export const authOptions = {
     providers: [
@@ -12,7 +13,7 @@ export const authOptions = {
             name: 'signin',
             id: 'signin',
             credentials: {
-                phone: { label: "Phone number", type: "text", placeholder: "phone number" },
+                number: { label: "Number", type: "text", placeholder: "Number" },
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials: any): Promise<any> {
@@ -56,6 +57,59 @@ export const authOptions = {
                     name: existingUser.name,
                     number: existingUser.number
                 }
+            }
+
+        }),
+        CredentialsProvider({
+            name: 'guest',
+            id: 'guest',
+            credentials: {
+                email: { label: "Email", type: "text", placeholder: "Email" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials: any): Promise<any> {
+
+                const result = guestSigninFormSchema.safeParse(credentials);
+                if (!result.success) {
+                    throw new ErrorHandler(
+                        'Bad request',
+                        'BAD_REQUEST',
+                        {
+                            fieldErrors: result.error.flatten().fieldErrors,
+                        }
+                    )
+                }
+                const { email, password } = result.data;
+
+                const guestUser = await db.user.findUnique({
+                    where: {
+                        email
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        number: true,
+                        password: true,
+                    }
+                })
+
+                if (!guestUser || !guestUser.password) {
+                    throw new ErrorHandler('Phone Number or password is incorrect', 'AUTHENTICATION_FAILED');
+                }
+
+                const isPasswordMatch = await bcrypt.compare(password, guestUser.password);
+                console.log("match-- ", isPasswordMatch);
+
+                if (!isPasswordMatch) {
+                    throw new ErrorHandler('Password is incorrect', 'AUTHENTICATION_FAILED')
+                }
+
+                return {
+                    id: guestUser.id.toString(),
+                    name: guestUser.name,
+                    number: guestUser.number
+                }
+
             }
 
         })

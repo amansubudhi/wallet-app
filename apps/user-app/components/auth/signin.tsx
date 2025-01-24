@@ -14,12 +14,13 @@ import {
     FormMessage,
 } from "../ui/Form"
 import { useState } from "react";
-import { signinFormSchema, SigninSchemaType } from "../../lib/schema/authSchema";
+import { signinFormSchema, SigninSchemaType, guestSigninFormSchema, GuestSigninSchemaType } from "../../lib/schema/authSchema";
 import { useToast } from '../../hooks/use-toast';
 import { signIn } from "next-auth/react";
 import Link from "next/link"
 import { useRouter } from 'next/navigation';
 import { PATHS } from '../../config/path.config';
+import { Button, buttonVariants } from "../ui/FormButton";
 
 
 type signInResponseType = {
@@ -71,6 +72,41 @@ export default function Signin() {
                 variant: 'destructive',
             });
         }
+    }
+
+    async function guestLogin() {
+        try {
+            const result: signInResponseType | undefined = await signIn('guest', {
+                email: process.env.NEXT_PUBLIC_GUEST_EMAIL,
+                password: process.env.NEXT_PUBLIC_GUEST_PASSWORD,
+                redirect: false
+            })
+            console.log('Sign-in result:', result)
+            if (!result?.ok) {
+                const errorMessage = result?.error?.includes('User') && result?.error?.includes('does not exist')
+                    ? 'User does not exist' : result?.error || 'Internal server error';
+
+                toast({
+                    title: errorMessage,
+                    variant: 'destructive'
+                });
+                return;
+            }
+            toast({
+                title: 'Login successful!',
+                variant: 'default'
+            });
+
+            const searchParams = new URLSearchParams(window.location.search)
+            const redirect = searchParams.get('next') || PATHS.HOME;
+            router.push(redirect);
+        } catch (_error) {
+            return toast({
+                title: 'Internal server error',
+                variant: 'destructive',
+            });
+        }
+
     }
 
     const togglePassword = (e: React.MouseEvent) => {
@@ -134,6 +170,18 @@ export default function Signin() {
                     </div>
                 </form>
             </Form>
+            <div className="relative mt-4">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-800"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercse">
+                    <span className="bg-black px-2 text-gray-400">or</span>
+                </div>
+            </div>
+            <div className="flex justify-center mt-2 w-full">
+                <Button className="bg-gray-800 hover:bg-gray-900 text-white w-full" onClick={guestLogin}>Sign in as Guest</Button>
+            </div>
+
         </div>
     )
 }
