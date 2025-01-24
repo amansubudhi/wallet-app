@@ -172,13 +172,13 @@ export default function Signin() {
             </Form>
             <div className="relative mt-4">
                 <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-800"></div>
+                    <div className="w-full border-t"></div>
                 </div>
-                <div className="relative flex justify-center text-xs uppercse">
-                    <span className="bg-black px-2 text-gray-400">or</span>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white text-gray-500">or</span>
                 </div>
             </div>
-            <div className="flex justify-center mt-2 w-full">
+            <div className="flex justify-center mt-4 w-full">
                 <Button className="bg-gray-800 hover:bg-gray-900 text-white w-full" onClick={guestLogin}>Sign in as Guest</Button>
             </div>
 
