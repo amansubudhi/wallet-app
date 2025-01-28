@@ -15,13 +15,13 @@ type ProcessRequestBody = {
 }
 
 const app = express();
-const PORT = process.env.PORT ||
+const PORT = process.env.PORT || 4000;
 
-    app.use(cors());
+app.use(cors());
 app.use(express.json())
 
 
-app.post("/process", (req: Request<any, any, ProcessRequestBody>, res: Response) => {
+app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) => {
     const { token, userId, amount } = req.body;
 
     if (!token || !userId || !amount) {
