@@ -13,8 +13,11 @@
   "description": "",
   "dependencies": {
     "@repo/db": "*",
-    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.14",
+    "cors": "^2.8.5",
     "esbuild": "^0.24.0",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "zod": "^3.24.1"
   }
 }

@@ -1,23 +1,43 @@
-import express from "express"
+import express, { Request, Response } from "express"
+import { z } from "zod";
+import cors from "cors";
 import db from "@repo/db/client"
 
+
 const app = express();
+const PORT = process.env.PORT || 3003;
+
+app.use(cors())
 app.use(express.json())
 
-app.post("/hdfcWebhook", async (req, res) => {
-    // Add zod validation
-    // Check if this request actually came from hdfc bank, use a webhook secret here
-    const paymentInformation = {
-        token: req.body.token,
-        userId: req.body.user_identifier,
-        amount: req.body.amount
-    };
+const webhookSchema = z.object({
+    token: z.string(),
+    user_identifier: z.number(),
+    amount: z.number(),
+});
+
+app.post("/webhook", async (req: Request, res: Response) => {
+    const webhooksecret = process.env.WEBHOOK_SECRET || "test-secret";
+    const incomingSecret = req.headers["x-webhhook-secret"];
+
+    if (incomingSecret !== webhooksecret) {
+        console.error("Unauthorized webhook request.");
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const validation = webhookSchema.safeParse(req.body);
+    if (!validation.success) {
+        console.error("Invalid webhook payload:", validation.error.format());
+        return res.status(400).json({ message: "Invalid payload", errors: validation.error.format() });
+
+    }
+    const paymentInformation = validation.data;
 
     try {
         await db.$transaction([
             db.balance.upsert({
                 where: {
-                    userId: paymentInformation.userId
+                    userId: paymentInformation.user_identifier
                 },
                 update: {
                     amount: {
@@ -29,7 +49,7 @@ app.post("/hdfcWebhook", async (req, res) => {
                     locked: 0,
                     user: {
                         connect: {
-                            id: Number(paymentInformation.userId)
+                            id: Number(paymentInformation.user_identifier)
                         }
                     }
                 }
@@ -43,6 +63,7 @@ app.post("/hdfcWebhook", async (req, res) => {
                 }
             })
         ]);
+        console.log(`Transaction ${paymentInformation.token} successfully processed.`);
         res.status(200).json({
             message: "captured"
         })
@@ -54,4 +75,11 @@ app.post("/hdfcWebhook", async (req, res) => {
     }
 })
 
-app.listen(3003);
+app.get("/health", (req: Request, res: Response) => {
+    res.status(200).json({ message: "Webhook app is running" });
+});
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Webhook app running on port ${PORT}`);
+});
