@@ -31,3 +31,11 @@
     background: #e0e0e0;
     /* Track color on hover */
 }
+
+.custom-scrollbar:focus {
+    outline: none
+}
+
+div:focus {
+    outline: none !important
+}

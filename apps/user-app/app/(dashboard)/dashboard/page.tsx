@@ -1,3 +1,4 @@
+
 import "../../globals.css"
 import prisma from "@repo/db/client";
 import { getServerSession } from "next-auth";
@@ -6,6 +7,7 @@ import { BalanceCard } from "../../../components/BalanceCard";
 import { QuickActionsCard } from "../../../components/QuickActionsCard";
 import { getCombinedTransactions } from "../../../lib/actions/getTransactions";
 import { TransactionsCard } from "../../../components/TransactionsCard";
+
 
 async function getBalance() {
     const session = await getServerSession(authOptions);

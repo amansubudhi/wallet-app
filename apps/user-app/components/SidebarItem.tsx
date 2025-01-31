@@ -1,7 +1,6 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+import { useRouter } from "next/navigation";
 
 export const SidebarItem = ({ href, title, icon }: { href: string; title: string; icon: React.ReactNode }) => {
     const router = useRouter();
