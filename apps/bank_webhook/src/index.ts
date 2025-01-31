@@ -18,7 +18,7 @@ const webhookSchema = z.object({
 
 app.post("/webhook", async (req: Request, res: Response) => {
     const webhooksecret = process.env.WEBHOOK_SECRET || "test-secret";
-    const incomingSecret = req.headers["x-webhhook-secret"];
+    const incomingSecret = req.headers["x-webhook-secret"];
 
     if (incomingSecret !== webhooksecret) {
         console.error("Unauthorized webhook request.");

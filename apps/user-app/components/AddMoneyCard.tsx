@@ -48,7 +48,7 @@ export const AddMoney = () => {
                         alert('Not allowed')
                     } else {
                         await createOnrampTransaction(amount * 100, provider)
-                        window.location.href = redirectUrl || "";
+                        // window.location.href = redirectUrl || "";
                     }
                 }}>
                     Add Money
