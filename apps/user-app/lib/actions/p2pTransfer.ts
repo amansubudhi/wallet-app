@@ -13,10 +13,11 @@ export async function p2pTransfer(to: string, amount: number) {
         }
     }
 
+    const isNumber = /^\d+$/.test(to);
     const toUser = await prisma.user.findFirst({
-        where: {
-            number: to
-        }
+        where: isNumber
+            ? { number: to }
+            : { name: to }
     });
 
     if (!toUser) {

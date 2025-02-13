@@ -1,16 +1,27 @@
+"use server"
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth"
 import prisma from "@repo/db/client";
+import { ErrorHandler } from "../error";
+
+export async function getUserSession() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user?.id) {
+            throw new ErrorHandler("User not authenticated", "AUTHENTICATION_FAILED");
+        }
+        return Number(session.user.id);
+    } catch (error) {
+        console.error("Authentication error", error);
+        throw new ErrorHandler("Authentication failed", "AUTHENTICATION_FAILED", error);
+    }
+}
 
 export async function getOnRampTransactions() {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
-        throw new Error("User not authenticated");
-    }
-
-    const userId = Number(session.user.id);
 
     try {
+        const userId = await getUserSession();
         const txns = await prisma.onRampTransaction.findMany({
             where: {
                 userId
@@ -30,27 +41,16 @@ export async function getOnRampTransactions() {
         }));
     } catch (error) {
         console.error("Error fetching on-ramp transactions:", error);
-        throw new Error("Failed to fetch on-ramp transactions");
+        throw new ErrorHandler("Failed to fetch on-ramp transactions", "INTERNAL_SERVER_ERROR", error);
     }
 
 }
-// return txns.map(t => ({
-//     id: t.id,
-//     time: t.startTime,
-//     amount: t.amount,
-//     status: t.status,
-//     provider: t.provider
-// }))
 
 
 export async function getP2PTransactions() {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
-        throw new Error("User not authenticated");
-    }
-    const userId = Number(session.user.id);
 
     try {
+        const userId = await getUserSession();
 
         const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -97,19 +97,14 @@ export async function getP2PTransactions() {
         return allTransactions;
     } catch (error) {
         console.error("Error fetching P2P transactions:", error);
-        throw new Error("Failed to fetch P2P transactions");
+        throw new ErrorHandler("Failed to fetch P2P transactions", "INTERNAL_SERVER_ERROR", error);
     }
 
 }
 
 
 export async function getCombinedTransactions() {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?.id) {
-        throw new Error("User not authenticated");
-    }
 
-    const userId = Number(session.user.id);
     try {
         const [onRampTxns, p2pTxns] = await Promise.all([
             getOnRampTransactions(),
@@ -124,6 +119,6 @@ export async function getCombinedTransactions() {
         return combinedTransactions;
     } catch (error) {
         console.error("Error fetching combined transactions:", error);
-        throw new Error("Failed to fetch combined transactions")
+        throw new ErrorHandler("Failed to fetch combined transactions", "INTERNAL_SERVER_ERROR", error);
     }
 }
