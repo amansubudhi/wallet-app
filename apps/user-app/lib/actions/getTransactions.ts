@@ -103,7 +103,7 @@ export async function getP2PTransactions() {
 }
 
 
-export async function getCombinedTransactions() {
+export const getCombinedTransactions = (async () => {
 
     try {
         const [onRampTxns, p2pTxns] = await Promise.all([
@@ -121,4 +121,4 @@ export async function getCombinedTransactions() {
         console.error("Error fetching combined transactions:", error);
         throw new ErrorHandler("Failed to fetch combined transactions", "INTERNAL_SERVER_ERROR", error);
     }
-}
+})

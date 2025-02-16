@@ -5,7 +5,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { ErrorHandler } from "./error";
 import { signinFormSchema, guestSigninFormSchema } from "./schema/authSchema";
+import jwt from "jsonwebtoken";
 
+interface UserType {
+    id: string;
+    name: string;
+    email?: string | null;
+    number: string | null;
+}
 
 export const authOptions = {
     providers: [
@@ -16,7 +23,7 @@ export const authOptions = {
                 number: { label: "Number", type: "text", placeholder: "Number" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials: any): Promise<any> {
+            async authorize(credentials: any): Promise<UserType | null> {
                 const result = signinFormSchema.safeParse(credentials);
                 if (!result.success) {
                     throw new ErrorHandler(
@@ -54,8 +61,8 @@ export const authOptions = {
                 }
                 return {
                     id: existingUser.id.toString(),
-                    name: existingUser.name,
-                    number: existingUser.number
+                    name: existingUser.name || "",
+                    number: existingUser.number || ""
                 }
             }
 
@@ -115,13 +122,31 @@ export const authOptions = {
         })
     ],
     callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                const typedUser = user as UserType;
+                token.id = typedUser.id;
+                token.accessToken = jwt.sign(
+                    { id: typedUser.id, number: typedUser.number || "" },
+                    process.env.JWT_SECRET || "websocketsecret",
+                    { expiresIn: TOKEN_EXPIRATION_TIME }
+                );
+            }
+            return token;
+        },
         async redirect({ baseUrl }) {
             //Always redirect to the assigned page after login
             return baseUrl;
         },
         async session({ token, session }: any) {
-            session.user.id = token.sub
-            return session
+            session.user = {
+                id: token.id,
+                name: token.name || "",
+                email: token.email || undefined,
+                number: token.number || "", // ✅ Ensures number is always a string
+            };
+            session.accessToken = token.accessToken;
+            return session;
         }
     },
     pages: {

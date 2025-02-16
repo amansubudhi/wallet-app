@@ -20,8 +20,9 @@ export const TransactionsCard = ({ transactions }: TransactionProps) => {
                 No Transactions found
             </div>
         ) : (
+
             <div className="pt-4">
-                {transactions.map(t => <div key={Number(t.id)} className="flex items-center border-b justify-between py-4">
+                {transactions.map((t, index) => <div key={`${t.id}-${index}`} className="flex items-center border-b justify-between py-4">
                     <div className="flex items-center gap-2">
                         {t.direction === 'in' ? (
                             <ArrowDownIcon />
