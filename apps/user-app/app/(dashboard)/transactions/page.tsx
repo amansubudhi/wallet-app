@@ -5,8 +5,9 @@ import { ArrowDownIcon, ArrowUpIcon, ClockCircleIcon, TransactionsCard } from ".
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useWebSocket } from "../../../store/useWebSocket";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { webSocketStateAtom } from "../../../store/webSocketAtom";
+import { transactionsAtom } from "../../../store/transactionAtom";
 
 
 interface Transaction {
@@ -37,38 +38,31 @@ function AmountCard({ label, icon, value }: { label: string, icon: React.ReactNo
 export default function TransactionsPage() {
     const { data: session } = useSession();
     const { connectWebSocket, disconnectWebSocket, socket, isConnected } = useWebSocket();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const [hasFetchedTransactions, setHasFetchedTransactions] = useState(false);
     const isWebSocketActive = useRecoilValue(webSocketStateAtom);
     const hasConnectedOnce = useRef<boolean>(false);
 
     useEffect(() => {
         async function fetchTransactions() {
-            try {
+            if (!hasFetchedTransactions) {
                 const txns = await getCombinedTransactions();
-                console.log("Transactions fetched...")
                 setTransactions(txns);
-                // setHasFetchedTransactions(true);
-            } catch (error) {
-                console.error("Failed to fetch transactions:", error)
+                setHasFetchedTransactions(true);
             }
-
         }
         fetchTransactions();
-    }, []);
+    }, [hasFetchedTransactions]);
 
     useEffect(() => {
-        if (!session?.accessToken) {
-            console.log("Session not found, Websocket will not connect.")
-            return;
-        }
-
-        if (transactions.length === 0) {
+        if (!session?.accessToken || !hasFetchedTransactions || transactions.length === 0) {
+            console.log("Skipping WebSocket Connection: Missing session or transactions not loaded");
             return;
         }
 
 
         const hasProcessingTransactions = transactions.some(txn => txn.type.startsWith("Bank Transfer") && txn.status === "Processing");
+        console.log(hasProcessingTransactions);
 
         if (hasProcessingTransactions) {
             if (!isConnected && !hasConnectedOnce.current) {
@@ -76,21 +70,23 @@ export default function TransactionsPage() {
                 connectWebSocket(session.accessToken);
                 hasConnectedOnce.current = true;
             }
-
         } else {
             console.log("No processing transactions found, Websocket not required")
             disconnectWebSocket();
             hasConnectedOnce.current = false;
         }
 
+    }, [session?.accessToken, transactions, hasFetchedTransactions, isConnected]);
 
+    useEffect(() => {
         return () => {
-            if (!hasFetchedTransactions && isConnected) {
-                console.log("Disconnecting websockets");
+            if (isConnected) {
+                console.log("Disconnecting WebSocket...");
                 disconnectWebSocket();
             }
-        }
-    }, [session?.accessToken, transactions]);
+        };
+    }, [isConnected]);
+
 
     useEffect(() => {
         if (!socket || !isConnected) return;

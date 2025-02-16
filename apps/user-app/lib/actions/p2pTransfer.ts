@@ -25,7 +25,7 @@ export async function p2pTransfer(to: string, amount: number) {
             message: "User not found"
         }
     }
-    await prisma.$transaction(async (tx) => {
+    const { transaction, updatedBalance } = await prisma.$transaction(async (tx) => {
         await tx.$queryRaw`SELECT * FROM "Balance" WHERE "userId" = ${Number(from)} FOR UPDATE`;
 
         const fromBalance = await tx.balance.findUnique({
@@ -75,24 +75,37 @@ export async function p2pTransfer(to: string, amount: number) {
             }
         });
 
-        // await tx.balance.update({
-        //     where: {
-        //         userId: toUser.id
-        //     },
-        //     data: {
-        //         amount: {
-        //             increment: amount
-        //         }
-        //     }
-        // });
+        const updatedSenderBalance = await tx.balance.findUnique({
+            where: { userId: Number(from) }
+        })
 
-        await tx.p2pTransfer.create({
+        const newTransaction = await tx.p2pTransfer.create({
             data: {
                 fromUserId: Number(from),
                 toUserId: toUser.id,
                 amount,
                 timestamp: new Date()
             }
-        })
+        });
+
+        return {
+            transaction: newTransaction,
+            updatedBalance: updatedSenderBalance,
+        }
     })
+
+    const formattedTransaction = {
+        id: transaction.id,
+        type: `To: ${toUser.name || toUser.number}`,
+        startTime: transaction.timestamp,
+        amount: transaction.amount,
+        status: "Success",
+        direction: "out",
+    }
+
+    return {
+        message: "Transfer Successful",
+        transaction: formattedTransaction,
+        updatedBalance
+    }
 }

@@ -9,53 +9,47 @@ import { getBalance } from "../../../lib/actions/getBalance";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "../../../store/useWebSocket";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { webSocketStateAtom } from "../../../store/webSocketAtom";
+import { balanceAtom } from "../../../store/balanceAtom";
+import { transactionsAtom } from "../../../store/transactionAtom";
 
 interface Balance {
     amount: number;
     locked: number;
 }
 
-interface Transaction {
-    id: number;
-    type: string;
-    startTime: Date;
-    amount: number;
-    status: string;
-    direction: string;
-}
+
 
 
 export default function DashBoardPage() {
     const { data: session } = useSession();
-    const [balance, setBalance] = useState<Balance>({ amount: 0, locked: 0 });
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [balance, setBalance] = useRecoilState(balanceAtom);
+    const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const { socket, connectWebSocket, disconnectWebSocket, isConnected } = useWebSocket();
     const isWebSocketActive = useRecoilValue(webSocketStateAtom);
     const hasConnectedOnce = useRef<boolean>(false);
+    const [hasFetchedData, setHasFetchedData] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
-            console.log("Fetching balance and transactions...")
-            const initialBalance = await getBalance();
-            setBalance(initialBalance);
+            if (!hasFetchedData) {
+                const newBalance = await getBalance();
+                setBalance(newBalance);
 
-            const txns = await getCombinedTransactions();
-            setTransactions(txns.slice(0, 3));
+                const txns = await getCombinedTransactions();
+                setTransactions(txns);
+
+                setHasFetchedData(true);
+            }
         }
         fetchData();
-    }, []);
+    }, [hasFetchedData]);
 
     useEffect(() => {
-        if (!session?.accessToken) {
+        if (!session?.accessToken || !hasFetchedData || transactions.length === 0) {
             console.log("NO session found, webSocket will not connect");
-            return
-        };
-
-        if (transactions.length === 0) {
-            console.log("Transactions still loading, skipping webSocket connection")
-            return
+            return;
         };
 
         const hasProcessingTransaction = transactions.some(
@@ -73,18 +67,19 @@ export default function DashBoardPage() {
             disconnectWebSocket();
             hasConnectedOnce.current = false;
         }
-
-        return () => {
-            if (!hasProcessingTransaction && isConnected) {
-                console.log("Disconnecting Websocket")
-                disconnectWebSocket();
-            }
-        };
-    }, [session?.accessToken, transactions]);
+    }, [session?.accessToken, transactions, hasFetchedData, isConnected]);
 
     useEffect(() => {
+        return () => {
+            if (isConnected) {
+                disconnectWebSocket();
+            }
+        }
+    }, [isConnected])
 
+    useEffect(() => {
         if (!socket || !isConnected) return;
+
         console.log("WebSocket is connected, setting up event listeners...")
 
         const handleTransactionUpdate = (updatedTransaction: { amount: number; transactionId: number; status: string }) => {
@@ -108,7 +103,7 @@ export default function DashBoardPage() {
             console.log("Removing WebSocket event listener");
             socket.off("transaction_update", handleTransactionUpdate);
         };
-    }, [socket]);
+    }, [socket, isConnected]);
 
 
 
@@ -121,7 +116,7 @@ export default function DashBoardPage() {
             <QuickActionsCard />
         </div>
         <div className="pt-4">
-            <TransactionsCard transactions={transactions} />
+            <TransactionsCard transactions={transactions.slice(0, 3)} />
         </div>
     </div>
 

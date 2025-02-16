@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import prisma from "@repo/db/client";
+import { revalidateAtom } from "../../store/revalidateAtom";
 
 
 export async function createOnrampTransaction(amount: number, provider: string) {
@@ -15,7 +16,7 @@ export async function createOnrampTransaction(amount: number, provider: string) 
         }
     }
     try {
-        await prisma.onRampTransaction.create({
+        const newTransaction = await prisma.onRampTransaction.create({
             data: {
                 userId: Number(userId),
                 amount: amount,
@@ -48,8 +49,19 @@ export async function createOnrampTransaction(amount: number, provider: string) 
         }
 
         console.log("Transaction sent to Bank API for processing.");
+
+        const formattedTransaction = {
+            id: newTransaction.id,
+            type: `Bank Transfer: ${newTransaction.provider}`,
+            startTime: newTransaction.startTime,
+            amount: newTransaction.amount,
+            status: newTransaction.status,
+            direction: "in"
+        }
+
         return {
             message: "On ramp transaction added and sent for processing",
+            transaction: formattedTransaction
         };
     } catch (error) {
         console.error("Error creating on-ramp transaction:", error);

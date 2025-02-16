@@ -6,6 +6,8 @@ import { Select } from "@repo/ui/select";
 import { TextInput } from "@repo/ui/textinput";
 import { useState } from "react";
 import { createOnrampTransaction } from "../lib/actions/createOnrampTransaction";
+import { useSetRecoilState } from "recoil";
+import { transactionsAtom } from "../store/transactionAtom";
 
 const SUPPORTED_BANKS = [{
     name: "State Bank of India",
@@ -26,6 +28,7 @@ export const AddMoney = () => {
     const [redirectUrl, setRedirectUrl] = useState(SUPPORTED_BANKS[0]?.redirectUrl);
     const [amount, setAmount] = useState(0);
     const [provider, setProvider] = useState(SUPPORTED_BANKS[0]?.name || "");
+    const setTransactions = useSetRecoilState(transactionsAtom);
 
     return <Card title="Add Money to Wallet">
         <div className="w-full pt-2">
@@ -47,7 +50,10 @@ export const AddMoney = () => {
                     if (amount <= 0) {
                         alert('Not allowed')
                     } else {
-                        await createOnrampTransaction(amount * 100, provider)
+                        const response = await createOnrampTransaction(amount * 100, provider)
+                        if (response.transaction) {
+                            setTransactions((prev) => [response.transaction, ...prev]);
+                        }
                         // window.location.href = redirectUrl || "";
                     }
                 }}>

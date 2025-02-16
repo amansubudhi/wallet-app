@@ -6,6 +6,9 @@ import { TextInput } from "@repo/ui/textinput";
 import { useEffect, useRef, useState } from "react"
 import { p2pTransfer } from "../lib/actions/p2pTransfer";
 import { searchUser } from "../lib/actions/getUsers";
+import { useSetRecoilState } from "recoil";
+import { transactionsAtom } from "../store/transactionAtom";
+import { balanceAtom } from "../store/balanceAtom";
 
 type UserSuggesion = {
     id: number;
@@ -18,7 +21,11 @@ export function SendCard() {
     const [amount, setAmount] = useState("");
     const [suggestions, setSuggestions] = useState<UserSuggesion[]>([]);
     const [loading, setLoading] = useState(false)
+    const [transferLoading, setTransferLoading] = useState(false);
     const suggestionRef = useRef<HTMLDivElement>(null);
+
+    const setTransactions = useSetRecoilState(transactionsAtom);
+    const setBalance = useSetRecoilState(balanceAtom);
 
     useEffect(() => {
         function handleClickOutside(event: Event) {
@@ -50,6 +57,29 @@ export function SendCard() {
         return () => clearTimeout(delayDebounce);
     }, [details])
 
+    const handleTransfer = async () => {
+        if (!details.trim() || amount.trim() === "" || isNaN(Number(amount)) || Number(amount) <= 0) {
+            alert("Please enter a valid recipient and amount.");
+            return;
+        }
+
+        setTransferLoading(true);
+        const response = await p2pTransfer(details, Number(amount) * 100);
+        setTransferLoading(false);
+
+        if (response.transaction && response.updatedBalance) {
+            setTransactions((prev) => [response.transaction, ...prev])
+            setBalance(response.updatedBalance);
+
+            setDetails("");
+            setAmount("");
+            setSuggestions([]);
+            // alert("Money sent successfully!")
+        } else {
+            // alert("Transfer failed. Please try again.")
+        }
+    }
+
     return <div className="h-fit">
         <Card title="Transfer Details">
             <div className="min-w-72 pt-2">
@@ -60,7 +90,7 @@ export function SendCard() {
                         value={details}
                         onChange={(value) => { setDetails(value) }}
                     />
-
+                    {loading && <div className="absolute top-full left-0 w-full bg-white p-2 rounded-xl shadow mt-1 z-50">Loading...</div>}
                     {suggestions.length > 0 && (
                         <ul className="absolute top-full left-0 w-full rounded-xl shadow mt-1 z-50">
                             {suggestions.map((user, index) => (
@@ -74,8 +104,7 @@ export function SendCard() {
                                         setSuggestions([])
                                         setDetails(user.name ?? user.number)
                                     }}
-                                >
-                                    {user.name} - {user.number}
+                                >   {user.name ? `${user.name} - ${user.number}` : user.number}
                                 </li>
                             ))}
                         </ul>
@@ -86,11 +115,7 @@ export function SendCard() {
                     setAmount(value)
                 }} />
                 <div className="pt-4 flex justify-center">
-                    <Button onClick={async () => {
-                        await p2pTransfer(details, Number(amount) * 100)
-                        setDetails("")
-                        setAmount("")
-                    }}>Send Money</Button>
+                    <Button onClick={handleTransfer}>Send Money</Button>
                 </div>
             </div>
         </Card>
