@@ -28,7 +28,6 @@ export async function searchUser(searchQuery: string) {
 
         return users.filter((u) => Number(u.id) !== Number(userId))
     } catch (error) {
-        console.error("Error fetching on-ramp transactions:", error);
         throw new ErrorHandler("Failed to fetch users", "INTERNAL_SERVER_ERROR", error);
     }
 }

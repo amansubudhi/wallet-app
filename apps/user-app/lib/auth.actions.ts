@@ -51,7 +51,6 @@ export default async function signUp(_data: SignupSchemaType) {
             message: "User registered successfully."
         };
     } catch (error) {
-        console.error("err", error);
         throw new ErrorHandler('Registration failed. Please try again!!', 'INTERNAL_SERVER_ERROR')
     }
 }

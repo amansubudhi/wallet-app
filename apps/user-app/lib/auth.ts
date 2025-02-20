@@ -51,10 +51,8 @@ export const authOptions = {
                 if (!existingUser || !existingUser.password) {
                     throw new ErrorHandler('Phone Number or password is incorrect', 'AUTHENTICATION_FAILED');
                 }
-                console.log("user -", existingUser)
 
                 const isPasswordMatch = await bcrypt.compare(password, existingUser.password);
-                console.log("match-- ", isPasswordMatch);
 
                 if (!isPasswordMatch) {
                     throw new ErrorHandler('Password is incorrect', 'AUTHENTICATION_FAILED')
@@ -105,7 +103,6 @@ export const authOptions = {
                 }
 
                 const isPasswordMatch = await bcrypt.compare(password, guestUser.password);
-                console.log("match-- ", isPasswordMatch);
 
                 if (!isPasswordMatch) {
                     throw new ErrorHandler('Password is incorrect', 'AUTHENTICATION_FAILED')
@@ -135,7 +132,6 @@ export const authOptions = {
             return token;
         },
         async redirect({ baseUrl }) {
-            //Always redirect to the assigned page after login
             return baseUrl;
         },
         async session({ token, session }: any) {
@@ -143,7 +139,6 @@ export const authOptions = {
                 id: token.id,
                 name: token.name || "",
                 email: token.email || undefined,
-                number: token.number || "", // ✅ Ensures number is always a string
             };
             session.accessToken = token.accessToken;
             return session;

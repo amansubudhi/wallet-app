@@ -3,7 +3,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 import prisma from "@repo/db/client";
-import { revalidateAtom } from "../../store/revalidateAtom";
 
 
 export async function createOnrampTransaction(amount: number, provider: string) {
@@ -42,13 +41,10 @@ export async function createOnrampTransaction(amount: number, provider: string) 
         });
 
         if (!response.ok) {
-            console.error("Error communicating with BANK API:", await response.text());
             return {
                 message: "Transaction added but failed to notify Bank API",
             };
         }
-
-        console.log("Transaction sent to Bank API for processing.");
 
         const formattedTransaction = {
             id: newTransaction.id,
@@ -64,7 +60,6 @@ export async function createOnrampTransaction(amount: number, provider: string) 
             transaction: formattedTransaction
         };
     } catch (error) {
-        console.error("Error creating on-ramp transaction:", error);
         return {
             message: "Failed to create on-ramp transaction",
         };

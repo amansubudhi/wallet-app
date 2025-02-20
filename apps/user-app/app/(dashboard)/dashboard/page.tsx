@@ -9,25 +9,17 @@ import { getBalance } from "../../../lib/actions/getBalance";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "../../../store/useWebSocket";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { webSocketStateAtom } from "../../../store/webSocketAtom";
+import { useRecoilState } from "recoil";
 import { balanceAtom } from "../../../store/balanceAtom";
 import { transactionsAtom } from "../../../store/transactionAtom";
-
-interface Balance {
-    amount: number;
-    locked: number;
-}
-
-
 
 
 export default function DashBoardPage() {
     const { data: session } = useSession();
+    console.log(session)
     const [balance, setBalance] = useRecoilState(balanceAtom);
     const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const { socket, connectWebSocket, disconnectWebSocket, isConnected } = useWebSocket();
-    const isWebSocketActive = useRecoilValue(webSocketStateAtom);
     const hasConnectedOnce = useRef<boolean>(false);
     const [hasFetchedData, setHasFetchedData] = useState(false);
 
@@ -48,7 +40,6 @@ export default function DashBoardPage() {
 
     useEffect(() => {
         if (!session?.accessToken || !hasFetchedData || transactions.length === 0) {
-            console.log("NO session found, webSocket will not connect");
             return;
         };
 
@@ -58,12 +49,10 @@ export default function DashBoardPage() {
 
         if (hasProcessingTransaction) {
             if (!isConnected && !hasConnectedOnce.current) {
-                console.log("Websocket Attempting to Connect...")
                 connectWebSocket(session.accessToken);
                 hasConnectedOnce.current = true
             }
         } else {
-            console.log("No processing transactions found, Websocket not required")
             disconnectWebSocket();
             hasConnectedOnce.current = false;
         }
@@ -79,8 +68,6 @@ export default function DashBoardPage() {
 
     useEffect(() => {
         if (!socket || !isConnected) return;
-
-        console.log("WebSocket is connected, setting up event listeners...")
 
         const handleTransactionUpdate = (updatedTransaction: { amount: number; transactionId: number; status: string }) => {
             setBalance((prevBalance) => ({
@@ -100,7 +87,6 @@ export default function DashBoardPage() {
         socket.on("transaction_update", handleTransactionUpdate);
 
         return () => {
-            console.log("Removing WebSocket event listener");
             socket.off("transaction_update", handleTransactionUpdate);
         };
     }, [socket, isConnected]);

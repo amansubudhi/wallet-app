@@ -39,9 +39,7 @@ export default function Signup() {
 
     async function formHandler(data: SignupSchemaType) {
         try {
-            console.log("data", data);
             const result = await signUp(data);
-            console.log("result-signup", result);
 
             if (!result.status) {
                 toast({

@@ -1,4 +1,4 @@
-import { number, z } from 'zod';
+import { z } from 'zod';
 
 export const signinFormSchema = z.object({
     number: z.string().regex(

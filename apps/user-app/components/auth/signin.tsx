@@ -7,20 +7,19 @@ import { Input } from "../ui/FormInput"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "../ui/Form"
 import { useState } from "react";
-import { signinFormSchema, SigninSchemaType, guestSigninFormSchema, GuestSigninSchemaType } from "../../lib/schema/authSchema";
+import { signinFormSchema, SigninSchemaType } from "../../lib/schema/authSchema";
 import { useToast } from '../../hooks/use-toast';
 import { signIn } from "next-auth/react";
 import Link from "next/link"
 import { useRouter } from 'next/navigation';
 import { PATHS } from '../../config/path.config';
-import { Button, buttonVariants } from "../ui/FormButton";
+import { Button } from "../ui/FormButton";
 
 
 type signInResponseType = {
@@ -46,7 +45,6 @@ export default function Signin() {
     async function formHandler(data: SigninSchemaType) {
         try {
             const result: signInResponseType | undefined = await signIn('signin', { ...data, redirect: false });
-            console.log("result-signin", result)
             if (!result?.ok) {
                 const errorMessage = result?.error?.includes('User') && result?.error?.includes('does not exist')
                     ? 'User does not exist' : result?.error || 'Internal server error';
@@ -65,7 +63,6 @@ export default function Signin() {
             const searchParams = new URLSearchParams(window.location.search)
             const redirect = searchParams.get('next') || PATHS.HOME;
             router.push(redirect);
-            // router.refresh();
         } catch (_error) {
             return toast({
                 title: 'Internal server error',

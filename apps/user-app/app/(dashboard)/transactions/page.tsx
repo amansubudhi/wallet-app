@@ -5,19 +5,9 @@ import { ArrowDownIcon, ArrowUpIcon, ClockCircleIcon, TransactionsCard } from ".
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useWebSocket } from "../../../store/useWebSocket";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { webSocketStateAtom } from "../../../store/webSocketAtom";
+import { useRecoilState } from "recoil";
 import { transactionsAtom } from "../../../store/transactionAtom";
 
-
-interface Transaction {
-    id: number;
-    type: string;
-    startTime: Date;
-    amount: number;
-    status: string;
-    direction: string;
-}
 
 type TransactionSummary = {
     received: number;
@@ -40,7 +30,6 @@ export default function TransactionsPage() {
     const { connectWebSocket, disconnectWebSocket, socket, isConnected } = useWebSocket();
     const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const [hasFetchedTransactions, setHasFetchedTransactions] = useState(false);
-    const isWebSocketActive = useRecoilValue(webSocketStateAtom);
     const hasConnectedOnce = useRef<boolean>(false);
 
     useEffect(() => {
@@ -56,22 +45,17 @@ export default function TransactionsPage() {
 
     useEffect(() => {
         if (!session?.accessToken || !hasFetchedTransactions || transactions.length === 0) {
-            console.log("Skipping WebSocket Connection: Missing session or transactions not loaded");
             return;
         }
 
-
         const hasProcessingTransactions = transactions.some(txn => txn.type.startsWith("Bank Transfer") && txn.status === "Processing");
-        console.log(hasProcessingTransactions);
 
         if (hasProcessingTransactions) {
             if (!isConnected && !hasConnectedOnce.current) {
-                console.log("Websocket Attempting to Connect")
                 connectWebSocket(session.accessToken);
                 hasConnectedOnce.current = true;
             }
         } else {
-            console.log("No processing transactions found, Websocket not required")
             disconnectWebSocket();
             hasConnectedOnce.current = false;
         }
@@ -81,7 +65,6 @@ export default function TransactionsPage() {
     useEffect(() => {
         return () => {
             if (isConnected) {
-                console.log("Disconnecting WebSocket...");
                 disconnectWebSocket();
             }
         };
@@ -91,11 +74,7 @@ export default function TransactionsPage() {
     useEffect(() => {
         if (!socket || !isConnected) return;
 
-        console.log("WebSocket is connected, setting up event listeners");
-
         const handleTransactionUpdate = (updatedTransaction: { transactionId: number; amount: number; status: string }) => {
-            console.log("Received transaction update:", updatedTransaction);
-
             setTransactions((prevTransactions) =>
                 prevTransactions.map((txn) =>
                     txn.id === updatedTransaction.transactionId
@@ -108,7 +87,6 @@ export default function TransactionsPage() {
         socket.on("transaction_update", handleTransactionUpdate);
 
         return () => {
-            console.log("Removing Websocket event listener")
             socket.off("transaction_update", handleTransactionUpdate);
         }
     }, [socket, isConnected]);
@@ -138,9 +116,6 @@ export default function TransactionsPage() {
                 <AmountCard label="Processing" icon={<ClockCircleIcon value="size-4" />} value={summary.processing} />
             </div>
             <TransactionsCard transactions={transactions} />
-            {!isWebSocketActive && (
-                <div className="text-red-500 mt-4">WebSocket is not connected</div>
-            )}
         </div>
     </div>
 }

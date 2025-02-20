@@ -13,7 +13,6 @@ export async function getUserSession() {
         }
         return Number(session.user.id);
     } catch (error) {
-        console.error("Authentication error", error);
         throw new ErrorHandler("Authentication failed", "AUTHENTICATION_FAILED", error);
     }
 }
@@ -40,7 +39,6 @@ export async function getOnRampTransactions() {
             direction: "in",
         }));
     } catch (error) {
-        console.error("Error fetching on-ramp transactions:", error);
         throw new ErrorHandler("Failed to fetch on-ramp transactions", "INTERNAL_SERVER_ERROR", error);
     }
 
@@ -96,7 +94,6 @@ export async function getP2PTransactions() {
 
         return allTransactions;
     } catch (error) {
-        console.error("Error fetching P2P transactions:", error);
         throw new ErrorHandler("Failed to fetch P2P transactions", "INTERNAL_SERVER_ERROR", error);
     }
 
@@ -118,7 +115,6 @@ export const getCombinedTransactions = (async () => {
 
         return combinedTransactions;
     } catch (error) {
-        console.error("Error fetching combined transactions:", error);
         throw new ErrorHandler("Failed to fetch combined transactions", "INTERNAL_SERVER_ERROR", error);
     }
 })

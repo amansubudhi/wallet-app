@@ -54,7 +54,6 @@ export const AddMoney = () => {
                         if (response.transaction) {
                             setTransactions((prev) => [response.transaction, ...prev]);
                         }
-                        // window.location.href = redirectUrl || "";
                     }
                 }}>
                     Add Money
