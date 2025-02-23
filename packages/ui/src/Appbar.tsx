@@ -15,7 +15,7 @@ export const Appbar = ({
 }: AppbarProps) => {
     return <div className="sticky top-4 flex flex-wrap justify-between items-center">
         <div className="text-xl font-semibold">
-            <Link href="/dashboard">PayTM</Link>
+            <Link href="/dashboard">ZenPay</Link>
         </div>
         <div className="flex items-center justify-center gap-2 hover:bg-gray-100 px-4 py-2 rounded-md cursor-pointer" onClick={user ? onSignout : onSignin}>
             <LogoutIcon />
