@@ -20,14 +20,11 @@ export const useWebSocket = () => {
     }, []);
 
     const SOCKET_URL = process.env.SOCKET_URL || "http://localhost:3003";
-    console.log("SOCKET_URL");
-    console.log(SOCKET_URL);
-
 
     const connectWebSocket = (token: string) => {
         if (socketRef.current && socketRef.current.connected) return;
 
-        const newSocket = io("http://localhost:3003", {
+        const newSocket = io(SOCKET_URL, {
             auth: { token },
             transports: ["websocket"],
             reconnectionAttempts: 3,
