@@ -28,8 +28,6 @@ app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) =
         return res.status(400).json({ message: "Missing required fields" });
     }
 
-    console.log(`Processing transaction ${token}`);
-
     setTimeout(() => {
         const transaction = {
             token,
@@ -37,8 +35,6 @@ app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) =
             amount,
             status: "Success"
         };
-
-        console.log(`Transaction processed:`, transaction);
 
         sendWebhook(transaction);
     }, Math.random() * 5000 + 2000);
@@ -49,33 +45,33 @@ app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) =
 
 
 
-function sendWebhook(transaction: TransactionData) {
+async function sendWebhook(transaction: TransactionData) {
     const webhookUrl = process.env.WEBHOOK_URL || "http://localhost:3003/webhook";
 
-    fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-webhook-secret": process.env.WEBHOOK_SECRET || "test-secret",
-        },
-        body: JSON.stringify({
-            token: transaction.token,
-            user_identifier: transaction.userId,
-            amount: transaction.amount,
-            status: transaction.status,
-        }),
-    })
-
-        .then((response) => {
-            if (response.ok) {
-                console.log(`Webhook sent successfully for transaction ${transaction.token}`);
-            } else {
-                console.log(`Failed to send webhook for transaction ${transaction.token}:`, response.statusText);
-            }
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-webhook-secret": process.env.WEBHOOK_SECRET || "test-secret",
+            },
+            body: JSON.stringify({
+                token: transaction.token,
+                user_identifier: transaction.userId,
+                amount: transaction.amount,
+                status: transaction.status,
+            }),
         })
-        .catch((error) => {
-            console.error(`Error sending webhook for transaction ${transaction.token}:`, error);
-        });
+
+        if (!response.ok) {
+            throw new Error("Webhook request failed");
+        }
+
+    } catch {
+        return;
+    }
+
+
 }
 
 app.get("/health", (req, res) => {

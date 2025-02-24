@@ -18,7 +18,6 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3003;
 const JWT_SECRET = process.env.JWT_SECRET || "wss"
-console.log(JWT_SECRET)
 
 const io = new Server(server, {
     cors: {
@@ -39,9 +38,6 @@ const webhookSchema = z.object({
 // WebSocket Authentication Middleware
 io.use((socket, next) => {
     const token = socket.handshake.auth.token as string;
-    // console.log("Works 1")
-
-    console.log("Received WebSocket Token:", token);
 
     if (!token) {
         console.error("Authentication error: No token provided");
@@ -50,7 +46,6 @@ io.use((socket, next) => {
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-        console.log("Decoded JWT:", decoded)
         socket.data.userId = Number(decoded.id);
         next();
     } catch (error) {
@@ -61,16 +56,11 @@ io.use((socket, next) => {
 
 // WebSocket Connection Handling
 io.on("connection", (socket) => {
-    console.log("New websocket connection received!")
 
     const userId = socket.data.userId;
-    console.log(`User ${userId} attempting to connect to Websockets`);
-
     socket.join(`user_${userId}`);
 
-    socket.on("disconnect", () => {
-        console.log(`User ${userId} disconnected`);
-    })
+    socket.on("disconnect", () => { })
 })
 
 //Webhook Handling for Transactions
@@ -79,13 +69,11 @@ app.post("/webhook", async (req: Request, res: Response) => {
     const incomingSecret = req.headers["x-webhook-secret"];
 
     if (incomingSecret !== webhooksecret) {
-        console.error("Unauthorized webhook request.");
         return res.status(401).json({ message: "Unauthorized" });
     }
 
     const validation = webhookSchema.safeParse(req.body);
     if (!validation.success) {
-        console.error("Invalid webhook payload:", validation.error.format());
         return res.status(400).json({ message: "Invalid payload", errors: validation.error.format() });
 
     }
@@ -121,7 +109,6 @@ app.post("/webhook", async (req: Request, res: Response) => {
                 }
             })
         ]);
-        console.log(`Transaction ${paymentInformation.token} successfully processed.`);
 
         const transaction = await db.onRampTransaction.findUnique({
             where: { token: paymentInformation.token },
@@ -139,13 +126,11 @@ app.post("/webhook", async (req: Request, res: Response) => {
             status: TransactionStatus.Success
         });
 
-        console.log("Transaction emitted");
 
         res.status(200).json({
             message: "Transaction updated successfully"
         })
     } catch (e) {
-        console.error(e);
         res.status(500).json({
             message: "Error while processing webhook"
         })
