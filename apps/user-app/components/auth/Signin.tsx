@@ -78,7 +78,6 @@ export default function Signin() {
                 password: process.env.NEXT_PUBLIC_GUEST_PASSWORD,
                 redirect: false
             })
-            console.log('Sign-in result:', result)
             if (!result?.ok) {
                 const errorMessage = result?.error?.includes('User') && result?.error?.includes('does not exist')
                     ? 'User does not exist' : result?.error || 'Internal server error';
