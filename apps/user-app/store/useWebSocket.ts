@@ -19,7 +19,7 @@ export const useWebSocket = () => {
         }
     }, []);
 
-    const SOCKET_URL = process.env.SOCKET_URL || "http://localhost:3003";
+    const SOCKET_URL = process.env.SOCKET_URL;
 
     const connectWebSocket = (token: string) => {
         if (socketRef.current && socketRef.current.connected) return;
@@ -34,13 +34,11 @@ export const useWebSocket = () => {
         socketRef.current = newSocket;
 
         newSocket.on("connect", () => {
-            console.log("Connected to WebSocket")
             setIsConnected(true);
 
         })
 
         newSocket.on("disconnect", () => {
-            console.log("Disconnected from WebSocket");
             socketRef.current = null;
             setIsConnected(false);
         });

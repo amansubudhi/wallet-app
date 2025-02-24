@@ -16,7 +16,6 @@ import { transactionsAtom } from "../../../store/transactionAtom";
 
 export default function DashBoardPage() {
     const { data: session } = useSession();
-    console.log(session)
     const [balance, setBalance] = useRecoilState(balanceAtom);
     const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const { socket, connectWebSocket, disconnectWebSocket, isConnected } = useWebSocket();

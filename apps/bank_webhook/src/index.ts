@@ -17,7 +17,7 @@ dotenv.config()
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3003;
-const JWT_SECRET = process.env.JWT_SECRET || "wss"
+const JWT_SECRET = process.env.JWT_SECRET
 
 const io = new Server(server, {
     cors: {
