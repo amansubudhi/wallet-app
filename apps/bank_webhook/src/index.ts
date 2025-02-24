@@ -4,7 +4,7 @@ import cors from "cors";
 import db from "@repo/db/client"
 import { Server } from "socket.io"
 import http from "http"
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 import dotenv from "dotenv"
 
 enum TransactionStatus {
@@ -13,11 +13,15 @@ enum TransactionStatus {
     Failed = "Failed"
 }
 
+interface DecodedToken {
+    id: number;
+}
+
 dotenv.config()
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3003;
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET || ""
 
 const io = new Server(server, {
     cors: {
@@ -45,7 +49,7 @@ io.use((socket, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload & DecodedToken;
         socket.data.userId = Number(decoded.id);
         next();
     } catch (error) {

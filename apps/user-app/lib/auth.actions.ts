@@ -37,7 +37,6 @@ export default async function signUp(_data: SignupSchemaType) {
                         },
                     },
                 });
-                console.log(user);
                 return user;
             },
             {
