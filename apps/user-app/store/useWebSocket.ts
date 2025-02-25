@@ -19,7 +19,8 @@ export const useWebSocket = () => {
         }
     }, []);
 
-    const SOCKET_URL = process.env.SOCKET_URL || "";
+    const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "";
+
 
     const connectWebSocket = (token: string) => {
         if (socketRef.current && socketRef.current.connected) return;

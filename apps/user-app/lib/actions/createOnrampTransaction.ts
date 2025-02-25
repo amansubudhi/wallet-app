@@ -27,6 +27,7 @@ export async function createOnrampTransaction(amount: number, provider: string) 
         })
 
         const bankupiURl = process.env.BANK_API_URL || "http://localhost:4000/process";
+        console.log(bankupiURl)
 
         const response = await fetch(bankupiURl, {
             method: "POST",
@@ -41,9 +42,12 @@ export async function createOnrampTransaction(amount: number, provider: string) 
         });
 
         if (!response.ok) {
+            console.log("Transaction failed to notify bank API")
             return {
                 message: "Transaction added but failed to notify Bank API",
             };
+        } else {
+            console.log("Transaction notified to bank_api")
         }
 
         const formattedTransaction = {

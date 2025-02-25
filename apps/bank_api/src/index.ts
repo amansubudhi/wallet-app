@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import dotenv from "dotenv"
 
 type TransactionData = {
     token: string;
@@ -14,6 +15,7 @@ type ProcessRequestBody = {
     amount: number;
 }
 
+dotenv.config()
 const app = express();
 const PORT = process.env.PORT || 3002;
 
@@ -40,13 +42,12 @@ app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) =
     }, Math.random() * 5000 + 2000);
 
     res.status(200).json({ message: "Transaction is being processed" });
-
 });
 
 
 
 async function sendWebhook(transaction: TransactionData) {
-    const webhookUrl = process.env.WEBHOOK_URL || "http://localhost:3003/webhook";
+    const webhookUrl = process.env.WEBHOOK_URL || "";
 
     try {
         const response = await fetch(webhookUrl, {

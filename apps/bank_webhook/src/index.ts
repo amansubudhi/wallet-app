@@ -44,7 +44,6 @@ io.use((socket, next) => {
     const token = socket.handshake.auth.token as string;
 
     if (!token) {
-        console.error("Authentication error: No token provided");
         return next(new Error("Authentication error: No token provided"))
     }
 
@@ -53,7 +52,6 @@ io.use((socket, next) => {
         socket.data.userId = Number(decoded.id);
         next();
     } catch (error) {
-        console.error("Websocket authentication failed:", error);
         return next(new Error("Authentication error: Invalid token"));
     }
 });
@@ -129,7 +127,6 @@ app.post("/webhook", async (req: Request, res: Response) => {
             amount: paymentInformation.amount,
             status: TransactionStatus.Success
         });
-
 
         res.status(200).json({
             message: "Transaction updated successfully"
