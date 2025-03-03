@@ -14,7 +14,7 @@ import {
 } from "../ui/Form"
 import { useState } from "react";
 import { signinFormSchema, SigninSchemaType } from "../../lib/schema/authSchema";
-import { useToast } from '../../hooks/use-toast';
+import { toast } from 'sonner';
 import { signIn } from "next-auth/react";
 import Link from "next/link"
 import { useRouter } from 'next/navigation';
@@ -31,7 +31,6 @@ type signInResponseType = {
 
 export default function Signin() {
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const { toast } = useToast();
     const router = useRouter();
 
     const form = useForm<SigninSchemaType>({
@@ -49,25 +48,16 @@ export default function Signin() {
                 const errorMessage = result?.error?.includes('User') && result?.error?.includes('does not exist')
                     ? 'User does not exist' : result?.error || 'Internal server error';
 
-                toast({
-                    title: errorMessage,
-                    variant: 'destructive'
-                });
+                toast.error(errorMessage);
                 return;
             }
-            toast({
-                title: 'Login successful!',
-                variant: 'default'
-            });
+            toast.success('Login successful!');
 
             const searchParams = new URLSearchParams(window.location.search)
             const redirect = searchParams.get('next') || PATHS.HOME;
             router.push(redirect);
         } catch (_error) {
-            return toast({
-                title: 'Internal server error',
-                variant: 'destructive',
-            });
+            return toast.error('Internal server error');
         }
     }
 
@@ -82,25 +72,16 @@ export default function Signin() {
                 const errorMessage = result?.error?.includes('User') && result?.error?.includes('does not exist')
                     ? 'User does not exist' : result?.error || 'Internal server error';
 
-                toast({
-                    title: errorMessage,
-                    variant: 'destructive'
-                });
+                toast.error(errorMessage);
                 return;
             }
-            toast({
-                title: 'Login successful!',
-                variant: 'default'
-            });
+            toast.success('Login successful!');
 
             const searchParams = new URLSearchParams(window.location.search)
             const redirect = searchParams.get('next') || PATHS.HOME;
             router.push(redirect);
         } catch (_error) {
-            return toast({
-                title: 'Internal server error',
-                variant: 'destructive',
-            });
+            return toast.error('Internal server error');
         }
 
     }

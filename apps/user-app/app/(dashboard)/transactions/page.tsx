@@ -31,6 +31,7 @@ export default function TransactionsPage() {
     const [transactions, setTransactions] = useRecoilState(transactionsAtom);
     const [hasFetchedTransactions, setHasFetchedTransactions] = useState(false);
     const hasConnectedOnce = useRef<boolean>(false);
+    const [visibleCount, setVisibleCount] = useState(10);
 
     useEffect(() => {
         async function fetchTransactions() {
@@ -115,7 +116,18 @@ export default function TransactionsPage() {
                 <AmountCard label="Sent" icon={<ArrowUpIcon value="size-4" />} value={summary.sent} />
                 <AmountCard label="Processing" icon={<ClockCircleIcon value="size-4" />} value={summary.processing} />
             </div>
-            <TransactionsCard transactions={transactions} />
+            <TransactionsCard transactions={transactions.slice(0, visibleCount)} />
+
+            {visibleCount < transactions.length && (
+                <div className="text-center mt-4">
+                    <button
+                        onClick={() => setVisibleCount(prev => prev + 10)}
+                        className="px-4 py-2 bg-gray-100 text-gray-500 font-semibold text-sm hover:bg-gray-200 rounded-lg"
+                    >
+                        Load More
+                    </button>
+                </div>
+            )}
         </div>
     </div>
 }

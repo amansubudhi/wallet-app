@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { useToast } from "../../hooks/use-toast";
+import { toast } from 'sonner';
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { signupFormSchema, SignupSchemaType } from "../../lib/schema/authSchema";
@@ -24,7 +24,6 @@ import { signIn } from "next-auth/react";
 
 export default function Signup() {
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const { toast } = useToast();
     const router = useRouter();
 
     const form = useForm<SignupSchemaType>({
@@ -42,16 +41,10 @@ export default function Signup() {
             const result = await signUp(data);
 
             if (!result.status) {
-                toast({
-                    variant: 'destructive',
-                    title: "Something went wrong!! try again after sometime."
-                });
+                toast.error("Something went wrong!! try again after sometime.");
                 return;
             }
-            toast({
-                variant: 'default',
-                title: "Signup succesful, Welcome!"
-            })
+            toast.success("Signup succesful, Welcome!")
 
             const signInResponse = await signIn("signin", {
                 redirect: false,
@@ -60,19 +53,13 @@ export default function Signup() {
             });
 
             if (signInResponse?.error) {
-                toast({
-                    variant: "destructive",
-                    title: "Failed to log in after signup. Please log in manually."
-                });
+                toast.error("Failed to log in after signup. Please log in manually.");
                 return;
             }
             router.push(PATHS.HOME);
 
         } catch {
-            toast({
-                variant: 'destructive',
-                title: "Something went wrong !! try again after sometime."
-            });
+            toast.error("Something went wrong !! try again after sometime.");
         }
     }
 
@@ -84,7 +71,7 @@ export default function Signup() {
     return (
         <div className="card bg-white p-6 rounded-lg shadow-sm border">
             <div className="card-header space-y-1.5 pb-6">
-                <h3 className="font-semibold text-2xl text-center">Sign up</h3>
+                <h3 className="font-semibold text-2xl text-center">Sign Up</h3>
                 <p className="text-sm text-gray-500 text-center">Create a new account</p>
             </div>
             <div className="card-form">
