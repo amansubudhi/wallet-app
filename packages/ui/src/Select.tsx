@@ -1,10 +1,12 @@
 "use client"
 
 export const Select = ({ options, onSelect }: {
+    value?: string
     onSelect: (value: string) => void;
     options: {
         key: string;
         value: string;
+        disabled?: boolean
     }[];
 }) => {
     return <select onChange={(e) => {
