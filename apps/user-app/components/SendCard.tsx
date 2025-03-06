@@ -9,6 +9,8 @@ import { searchUser } from "../lib/actions/getUsers";
 import { useSetRecoilState } from "recoil";
 import { transactionsAtom } from "../store/transactionAtom";
 import { balanceAtom } from "../store/balanceAtom";
+import { toast } from "sonner"
+
 
 type UserSuggesion = {
     id: number;
@@ -21,7 +23,6 @@ export function SendCard() {
     const [amount, setAmount] = useState("");
     const [suggestions, setSuggestions] = useState<UserSuggesion[]>([]);
     const [loading, setLoading] = useState(false)
-    const [transferLoading, setTransferLoading] = useState(false);
     const suggestionRef = useRef<HTMLDivElement>(null);
 
     const setTransactions = useSetRecoilState(transactionsAtom);
@@ -59,13 +60,11 @@ export function SendCard() {
 
     const handleTransfer = async () => {
         if (!details.trim() || amount.trim() === "" || isNaN(Number(amount)) || Number(amount) <= 0) {
-            alert("Please enter a valid recipient and amount.");
+            toast.error('Please enter a valid recipient and amount.');
             return;
         }
 
-        setTransferLoading(true);
         const response = await p2pTransfer(details, Number(amount) * 100);
-        setTransferLoading(false);
 
         if (response.transaction && response.updatedBalance) {
             setTransactions((prev) => [response.transaction, ...prev])
@@ -74,9 +73,9 @@ export function SendCard() {
             setDetails("");
             setAmount("");
             setSuggestions([]);
-            // alert("Money sent successfully!")
+            toast.success('Money sent successfully')
         } else {
-            // alert("Transfer failed. Please try again.")
+            toast.error("Transfer failed. Please try again")
         }
     }
 
