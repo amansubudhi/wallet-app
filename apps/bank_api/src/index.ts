@@ -25,7 +25,6 @@ app.use(express.json())
 
 app.post("/process", (req: Request<{}, {}, ProcessRequestBody>, res: Response) => {
     const { token, userId, amount } = req.body;
-    console.log("Transaction recieved with details")
 
     if (!token || !userId || !amount) {
         return res.status(400).json({ message: "Missing required fields" });
