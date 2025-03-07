@@ -13,7 +13,7 @@ export default function SigninPage() {
                             <Sparkles className="h-6 w-6 text-yellow-500" />
                         </div>
 
-                        <p className="">Experience seamless money management with WalletApp. Send and receive money with ease.</p>
+                        <p className="">Experience seamless money management with ZenPay. Send and receive money with ease.</p>
                     </div>
                     <Signin />
                 </div>
